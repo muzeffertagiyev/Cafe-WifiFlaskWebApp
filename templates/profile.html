@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %} - {{user.username.title()}}/Profile {% endblock %}
+{% block styles %}
+{{super()}}
+{% endblock %}
+
+{% block content %}
+
+<div class="jumbotron text-center">
+  <div class="container">
+    <h1 class="display-4"> Profile </h1>
+    <hr class="my-4">
+    <h5>Username : {{user.username.title()}} </h5>
+    {% if current_user.id == user.id %}
+    <h5>Email: {{user.email}}</h5>
+      <a class="btn btn-warning btn-lg mr-2 mt-5" href="{{url_for('update_details', username=current_user.username)}}" role="button">Update Profile Details</a>
+      <a class="btn btn-success btn-lg mr-2 mt-5" href="{{url_for('reset_password', username=current_user.username)}}" role="button">Reset Password</a>
+      <hr class="my-4">
+      <a class="btn btn-primary btn-lg btn-block" href="{{url_for('add_cafe')}}" role="button">Add cafe</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="container mb-5">
+  <div class="row">
+    <div class="col-sm-12">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {%for category, message in messages%}
+                  <div class="alert alert-{{category}}" role="alert" id="flash-message">
+                    {{message}}
+                  </div>
+                {% endfor %}
+            {% endif %}
+      {% endwith %}
+      {% if current_user.id == user.id %}
+        <h1>Your Cafes</h1>
+      {% else %}
+        <h1>Cafes added by '{{user.username.title()}}'</h1>
+      {%endif %}
+      {% if cafes.pages > 1 %}
+            <nav aria-label="Pagination">
+              <ul class="pagination justify-content-center">
+                {% if cafes.has_prev %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('profile', username=user.username,page=cafes.prev_num) }}" tabindex="-1">Previous</a>
+                </li>
+                {% else %}
+                  <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">Previous</a>
+                  </li>
+                {% endif %}
+          {% for num in cafes.iter_pages() %}
+            {% if num %}
+              {% if cafes.page == num %}
+                <li class="page-item active" aria-current="page">
+                  <span class="page-link">{{ num }} <span class="sr-only">(current)</span></span>
+                </li>
+              {% else %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('profile',username=user.username, page=num) }}">{{ num }}</a>
+                </li>
+              {% endif %}
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">...</span>
+              </li>
+            {% endif %}
+          {% endfor %}
+            {% if cafes.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('profile', username=user.username, page=cafes.next_num) }}">Next</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">Next</span>
+              </li>
+            {% endif %}
+            </ul>
+           </nav>
+          {% endif %}
+      <div class="table-responsive-sm">
+          <table class="table">
+            <thead>
+              <!-- <th scope="col">ID</th> -->
+              <th scope="col">Cafe Name</th>
+              <th scope="col">Map Link</th>
+              <th scope="col">Image Link</th>
+              <th scope="col">City</th>
+              <th scope="col">Toilet</th>
+              <th scope="col">WIFI</th>
+              <th scope="col">Sockets</th>
+              <th scope="col">Making Reservations</th>
+              <th scope="col">Seats</th>
+              <th scope="col">Coffee Price</th>
+          </thead>
+      </div>
+          <tbody>
+            {% for cafe in cafes: %}
+              <tr>
+                  <!-- <td>{{ cafe.id }}</td> -->
+                  <td>{{ cafe.name }}</td>
+                  <td><a href="{{ cafe.map_url }}">Maps Link</a></td>
+                  <td><a href="{{ cafe.img_url }}">Image Link</a></td>
+                  <td>{{ cafe.location }}</td>
+                  <td>{{ '✅' if cafe.has_toilet else '❌' }}</td>
+                  <td>{{ '✅' if cafe.has_wifi else '❌' }}</td>
+                  <td>{{ '✅' if cafe.has_sockets else '❌'}}</td>
+                  <td>{{ '✅' if cafe.can_take_calls else '❌' }}</td>
+                  <td>{{ cafe.seats }}</td>
+                  <td>{{ cafe.coffee_price }}</td>
+                  {% if current_user.id == user.id %}
+                  <td><a href="{{url_for('update_cafe',id=cafe.id)}}">Update</a></td>
+                  <td><a href="{{url_for('delete_cafe',id=cafe.id)}}">Delete</a></td>
+                  {% endif %}
+
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if cafes.pages > 1 %}
+            <nav aria-label="Pagination">
+              <ul class="pagination justify-content-center">
+                {% if cafes.has_prev %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('profile', username=user.username,page=cafes.prev_num) }}" tabindex="-1">Previous</a>
+                </li>
+                {% else %}
+                  <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">Previous</a>
+                  </li>
+                {% endif %}
+          {% for num in cafes.iter_pages() %}
+            {% if num %}
+              {% if cafes.page == num %}
+                <li class="page-item active" aria-current="page">
+                  <span class="page-link">{{ num }} <span class="sr-only">(current)</span></span>
+                </li>
+              {% else %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('profile',username=user.username, page=num) }}">{{ num }}</a>
+                </li>
+              {% endif %}
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">...</span>
+              </li>
+            {% endif %}
+          {% endfor %}
+            {% if cafes.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('profile', username=user.username, page=cafes.next_num) }}">Next</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">Next</span>
+              </li>
+            {% endif %}
+            </ul>
+           </nav>
+          {% endif %}
+      <hr class="my-4">
+      <p><a href="{{ url_for('add_cafe') }}">Add More Cafe</a></p>
+  </div>
+</div>
+
+
+<script src="{{ url_for('static', filename='js/hide_flash.js')}}"></script>
+
+{% endblock %}
+

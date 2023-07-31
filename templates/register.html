@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %} - Register{% endblock %}
+
+{% block styles %}
+{{ super() }}
+{% endblock %}
+
+
+
+{% block content %}
+{% if request.endpoint == 'register' %}
+<body class="authentication-section">
+{% else %}
+<body>
+{% endif %}
+<div class="authentication-form authentication-section">
+
+      <form action="{{ url_for('register') }}" method="POST">
+        {{ form.csrf_token }}
+
+        <div class="form-icon">
+          <span><i class="icon icon-user"></i></span>
+        </div>
+
+        <h2 class="text-center mb-5">Register Form</h2>
+
+        
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {%for category, message in messages%}
+                  <div class="alert alert-{{category}}" role="alert" id="flash-message">
+                    {{message}}
+                  </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if form.confirm_password.errors %}
+            <div class="alert alert-danger mt-2" role="alert">
+                {{ form.confirm_password.errors[0] }}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+          {{ form.username(class="form-control item", placeholder="Enter your username", required="required") }}
+        </div>
+        <div class="form-group">
+          {{ form.email(class="form-control item", placeholder="Enter your email", required="required") }}
+        </div>
+        <div class="form-group">
+          {{ form.password(class="form-control item", placeholder="Enter your password", required="required") }}
+        </div>
+        <div class="form-group">
+          {{ form.confirm_password(class="form-control item", placeholder="Confirm your password", required="required") }}
+          
+        </div>
+        <div class="form-group mt-5">
+          <button type="submit" class="btn btn-block submit-account">Register</button>
+        </div>
+        
+      </form>
+</div>
+</body>
+{% endblock %}

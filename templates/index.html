@@ -1,22 +1,284 @@
-{% extends 'bootstrap/base.html' %}
+{% extends 'base.html' %}
 
-{% block title %}Coffee and Wifi{% endblock %}
+{% block title %}{% endblock %}
 {% block styles %}
 {{super()}}
-<link rel="stylesheet" href="../static/css/styles.css">
-
 {% endblock %}
 
 {% block content %}
 <div class="jumbotron text-center">
-    <div class="container">
-  <h1 class="display-4">☕️ Coffee & Wifi 💻</h1>
-  <p class="lead">Want to work in a cafe but need power and wifi?</p>
-  <hr class="my-4">
-  <p>You've found the right place! Checkout my collection of cafes with data on power socket availability, wifi speed and coffee quality.</p>
-  <a class="btn btn-warning btn-lg" href="{{url_for('cafes')}}" role="button">Show Me!</a>
-  <a class="btn btn-primary btn-lg" href="{{url_for('add_cafe')}}" role="button">Add cafe</a>
+  <div class="container">
+    <h1 class="display-4">☕️ Coffee & Wifi 💻</h1>
+    <p class="lead">Want to work in a cafe but need power and wifi?</p>
+    <hr class="my-4">
+    <p>You've found the right place! Checkout my collection of cafes with data on power socket availability, wifi speed and coffee quality.</p>
+    <a class="btn btn-warning btn-lg mr-2" href="#search" role="button">Search By City</a>
+    <a class="btn btn-primary btn-lg" href="{{url_for('add_cafe')}}" role="button">Add cafe</a>
+  </div>
 </div>
-    </div>
 
+
+<div class="container mb-5">
+  <div class="row">
+    <div class="col-sm-12">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {%for category, message in messages%}
+            <div class="alert alert-{{category}}" role="alert" id="flash-message">
+              {{message}}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% if request.endpoint == 'home' %}
+        <h1>All Cafes</h1>
+        {% if cafes.pages > 1 %}
+            <nav aria-label="Pagination">
+              <ul class="pagination justify-content-center">
+                {% if cafes.has_prev %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('home', page=cafes.prev_num) }}" tabindex="-1">Previous</a>
+                </li>
+                {% else %}
+                  <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">Previous</a>
+                  </li>
+                {% endif %}
+          {% for num in cafes.iter_pages() %}
+            {% if num %}
+              {% if cafes.page == num %}
+                <li class="page-item active" aria-current="page">
+                  <span class="page-link">{{ num }} <span class="sr-only">(current)</span></span>
+                </li>
+              {% else %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('home', page=num) }}">{{ num }}</a>
+                </li>
+              {% endif %}
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">...</span>
+              </li>
+            {% endif %}
+          {% endfor %}
+            {% if cafes.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('home', page=cafes.next_num) }}">Next</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">Next</span>
+              </li>
+            {% endif %}
+            </ul>
+           </nav>
+          {% endif %}
+        <div class="table-responsive-sm">
+          <table class="table">
+            <thead>
+              <th scope="col">Account</th>
+              <th scope="col">Cafe Name</th>
+              <th scope="col">Map Link</th>
+              <th scope="col">Image Link</th>
+              <th scope="col">City</th>
+              <th scope="col">Toilet</th>
+              <th scope="col">WIFI</th>
+              <th scope="col">Sockets</th>
+              <th scope="col">Making Reservations</th>
+              <th scope="col">Seats</th>
+              <th scope="col">Coffee Price</th>
+            </thead>
+        </div>
+            <tbody>
+              {% for cafe in cafes: %}
+                <tr>
+                  <td><a href="{{url_for('profile',username=user_dict[cafe.user_id])}}">{{ user_dict[cafe.user_id].title() }}</a> </td>
+                  <td>{{ cafe.name }}</td>
+                  <td><a href="{{ cafe.map_url }}">Maps Link</a></td>
+                  <td><a href="{{ cafe.img_url }}">Image Link</a></td>
+                  <td>{{ cafe.location }}</td>
+                  <td>{{ '✅' if cafe.has_toilet else '❌' }}</td>
+                  <td>{{ '✅' if cafe.has_wifi else '❌' }}</td>
+                  <td>{{ '✅' if cafe.has_sockets else '❌'}}</td>
+                  <td>{{ '✅' if cafe.can_take_calls else '❌' }}</td>
+                  <td>{{ cafe.seats }}</td>
+                  <td>{{ cafe.coffee_price }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% if cafes.pages > 1 %}
+            <nav aria-label="Pagination">
+              <ul class="pagination justify-content-center">
+                {% if cafes.has_prev %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('home', page=cafes.prev_num) }}" tabindex="-1">Previous</a>
+                </li>
+                {% else %}
+                  <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">Previous</a>
+                  </li>
+                {% endif %}
+          {% for num in cafes.iter_pages() %}
+            {% if num %}
+              {% if cafes.page == num %}
+                <li class="page-item active" aria-current="page">
+                  <span class="page-link">{{ num }} <span class="sr-only">(current)</span></span>
+                </li>
+              {% else %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('home', page=num) }}">{{ num }}</a>
+                </li>
+              {% endif %}
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">...</span>
+              </li>
+            {% endif %}
+          {% endfor %}
+            {% if cafes.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('home', page=cafes.next_num) }}">Next</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">Next</span>
+              </li>
+            {% endif %}
+            </ul>
+           </nav>
+          {% endif %}
+    
+      {% elif endpoint != 'profile' %}
+        <h1>Cafes in "{{location}}"</h1>
+        {% if searched_cafes %}
+        <nav aria-label="Pagination">
+          <ul class="pagination justify-content-center">
+            {% if searched_cafes.has_prev %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('search_by_location', location=location, page=searched_cafes.prev_num) }}" tabindex="-1">Previous</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1">Previous</a>
+              </li>
+            {% endif %}
+        
+            {% for num in searched_cafes.iter_pages() %}
+              {% if num %}
+                {% if searched_cafes.page == num %}
+                  <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ num }} <span class="sr-only">(current)</span></span>
+                  </li>
+                {% else %}
+                  <li class="page-item">
+                    <a class="page-link" href="{{ url_for('search_by_location', location=location, page=num) }}">{{ num }}</a>
+                  </li>
+                {% endif %}
+              {% else %}
+                <li class="page-item disabled">
+                  <span class="page-link">...</span>
+                </li>
+              {% endif %}
+            {% endfor %}
+        
+            {% if searched_cafes.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('search_by_location', location=location, page=searched_cafes.next_num) }}">Next</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">Next</span>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+        
+        <div class="table-responsive-sm">
+          <table class="table">
+            <thead> 
+              <th scope="col">Account</th>
+              <th scope="col">Cafe Name</th>
+              <th scope="col">Map Link</th>
+              <th scope="col">Image Link</th>
+              <th scope="col">City</th>
+              <th scope="col">Toilet</th>
+              <th scope="col">WIFI</th>
+              <th scope="col">Sockets</th>
+              <th scope="col">Making Reservations</th>
+              <th scope="col">Seats</th>
+              <th scope="col">Coffee Price</th>
+            </thead>
+        </div>
+            <tbody>
+              {% for cafe in searched_cafes: %}
+                <tr>
+                  <td><a href="{{url_for('profile',username=user_dict[cafe.user_id])}}">{{ user_dict[cafe.user_id].title() }}</a> </td>
+                  <td>{{ cafe.name }}</td>
+                  <td><a href="{{ cafe.map_url }}">Maps Link</a></td>
+                  <td><a href="{{ cafe.img_url }}">Image Link</a></td>
+                  <td>{{ cafe.location }}</td>
+                  <td>{{ '✅' if cafe.has_toilet else '❌' }}</td>
+                  <td>{{ '✅' if cafe.has_wifi else '❌' }}</td>
+                  <td>{{ '✅' if cafe.has_sockets else '❌'}}</td>
+                  <td>{{ '✅' if cafe.can_take_calls else '❌' }}</td>
+                  <td>{{ cafe.seats }}</td>
+                  <td>{{ cafe.coffee_price }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% if searched_cafes %}
+          <nav aria-label="Pagination">
+            <ul class="pagination justify-content-center">
+              {% if searched_cafes.has_prev %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('search_by_location', location=location, page=searched_cafes.prev_num) }}" tabindex="-1">Previous</a>
+                </li>
+              {% else %}
+                <li class="page-item disabled">
+                  <a class="page-link" href="#" tabindex="-1">Previous</a>
+                </li>
+              {% endif %}
+          
+              {% for num in searched_cafes.iter_pages() %}
+                {% if num %}
+                  {% if searched_cafes.page == num %}
+                    <li class="page-item active" aria-current="page">
+                      <span class="page-link">{{ num }} <span class="sr-only">(current)</span></span>
+                    </li>
+                  {% else %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('search_by_location', location=location, page=num) }}">{{ num }}</a>
+                    </li>
+                  {% endif %}
+                {% else %}
+                  <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                  </li>
+                {% endif %}
+              {% endfor %}
+          
+              {% if searched_cafes.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('search_by_location', location=location, page=searched_cafes.next_num) }}">Next</a>
+                </li>
+              {% else %}
+                <li class="page-item disabled">
+                  <span class="page-link">Next</span>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+      {% endif %}
+      <hr class="my-4">
+      <p><a href="{{ url_for('add_cafe') }}">Add More Cafe</a></p>
+      
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/hide_flash.js')}}"></script>
 {% endblock %}
