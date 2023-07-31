@@ -14,9 +14,7 @@ The Flask Cafe  & Wifi App is a web application that allows users to review and 
 - [Usage](#usage)
 - [Features](#features)
 - [Folder Structure](#folder-structure)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+
 
 ## Getting Started
 
